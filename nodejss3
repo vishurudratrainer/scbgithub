@@ -1,0 +1,50 @@
+[default]
+    aws_access_key_id = YOUR_ACCESS_KEY_ID
+    aws_secret_access_key = YOUR_SECRET_ACCESS_KEY
+credentials
+
+//npm i @aws-sdk/client-s3
+//npm i @aws-sdk/lib-storage
+//npm i aws-sdk
+
+const AWS = require('@aws-sdk/client-s3');
+const fs = require('fs')
+const path = require('path')
+const storage = require('@aws-sdk/lib-storage')
+
+const s3Client = new AWS.S3Client({ region: "ap-south-1" }); // e.g., "us-east-1"
+ 
+    async function listS3Buckets() {
+      try {
+        const command = new AWS.ListBucketsCommand({});
+        const data = await s3Client.send(command);
+        console.log("S3 Buckets:", data.Buckets);
+      } catch (err) {
+        console.error("Error listing buckets:", err);
+      }
+    }
+listS3Buckets();
+async function uploadFileToS3(bucketName, filePath, keyName) {
+        const fileStream = fs.createReadStream(filePath);
+ 
+        const upload = new storage.Upload({
+            client: s3Client,
+            params: {
+                Bucket: bucketName,
+                Key: keyName || path.basename(filePath), // Use keyName if provided, else use file's base name
+                Body: fileStream,
+            },
+        });
+ 
+        upload.on("httpUploadProgress", (progress) => {
+            console.log(progress); // Optional: track upload progress
+        });
+ 
+        try {
+            await upload.done();
+            console.log(`Successfully uploaded ${filePath} to S3 bucket ${bucketName} as ${keyName}`);
+        } catch (error) {
+            console.error("Error uploading file:", error);
+        }
+    }
+uploadFileToS3('amzn-java-practise','/Users/badrir/Documents/S3Example.txt','S3Example')
