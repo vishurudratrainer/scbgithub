@@ -48,3 +48,26 @@ async function uploadFileToS3(bucketName, filePath, keyName) {
         }
     }
 uploadFileToS3('amzn-java-practise','/Users/badrir/Documents/S3Example.txt','S3Example')
+
+
+ async function downloadFile(bucketName, key, localFilePath) {
+        try {
+            const command = new GetObjectCommand({ Bucket: bucketName, Key: key });
+            const response = await s3Client.send(command);
+
+            // Example using fs/promises for saving the stream to a file
+            const Body  = response.Body;
+            if (Body) {
+                const { writeFile } = require('node:fs/promises');
+                await writeFile(localFilePath, Body);
+                console.log(`File downloaded to ${localFilePath}`);
+            } else {
+                console.error("No body found in S3 response.");
+            }
+        } catch (error) {
+            console.error("Error downloading file from S3:", error);
+        }
+    }
+
+    // Example usage:
+    // downloadFile("your-bucket-name", "your-file-key", "local-path/downloaded-file.tx
