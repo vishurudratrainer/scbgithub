@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    container_name: express-app
+    ports:
+      - "3000:3000"
+    environment:
+      # These variables should match what your Express app expects
+      DB_HOST: mysqldb
+      DB_USER: root
+      DB_PASSWORD: root
+      DB_NAME: aws
+    depends_on:
+      - mysqldb
+    networks:
+      - app-network
+
+  mysqldb:
+    image: mysql:5.7
+    container_name: mysql-database
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: aws
+    volumes:
+      # Persist data even if the container is removed
+      - mysql-data:/var/lib/mysql
+    networks:
+      - app-network
+
+volumes:
+  mysql-data:
+
+networks:
+  app-network:
+    driver: bridge
